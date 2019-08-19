@@ -5,6 +5,7 @@ QTCREATOR_COPYRIGHT_YEAR = 2019
 BINARY_ARTIFACTS_BRANCH = master
 
 IDE_DISPLAY_NAME = Qt Creator
+#指定的qtcreator exe名称
 IDE_ID = qtcreator
 IDE_CASED_ID = QtCreator
 
