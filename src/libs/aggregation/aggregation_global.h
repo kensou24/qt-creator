@@ -1,4 +1,4 @@
-/****************************************************************************
+﻿/****************************************************************************
 **
 ** Copyright (C) 2016 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
@@ -27,8 +27,9 @@
 
 #include <qglobal.h>
 
+// lib导出定义
 #if defined(AGGREGATION_LIBRARY)
-#  define AGGREGATION_EXPORT Q_DECL_EXPORT
-#else
-#  define AGGREGATION_EXPORT Q_DECL_IMPORT
-#endif
+# define AGGREGATION_EXPORT Q_DECL_EXPORT
+#else // if defined(AGGREGATION_LIBRARY)
+# define AGGREGATION_EXPORT Q_DECL_IMPORT
+#endif // if defined(AGGREGATION_LIBRARY)

@@ -1,4 +1,12 @@
+#用于lib生成的pri文件
+# 例如，_PRO_FILE_PWD_的值是E:/Sources/qt-creator/src/libs/aggregation，
+# 匹配[^/]+$的部分是aggregation，
+# 使用()则将该字符串捕获到\1，
+# 最后的\\1/\\1_dependencies.pri部分最终结果是aggregation/aggregation_dependencies.pri。
+# $$replace()函数替换之后的结果是E:/Sources/qt-creator/src/libs/aggregation/aggregation_dependencies.pri。
 include($$replace(_PRO_FILE_PWD_, ([^/]+$), \\1/\\1_dependencies.pri))
+
+#QTC_LIB_NAME正是在 aggregation_dependencies.pri 中定义的
 TARGET = $$QTC_LIB_NAME
 
 include(../qtcreator.pri)
@@ -18,6 +26,7 @@ osx {
 }
 include(rpath.pri)
 
+#添加后缀以及版本
 TARGET = $$qtLibraryTargetName($$TARGET)
 
 TEMPLATE = lib

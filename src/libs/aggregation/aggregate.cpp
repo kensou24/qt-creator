@@ -1,4 +1,4 @@
-/****************************************************************************
+﻿/****************************************************************************
 **
 ** Copyright (C) 2016 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
@@ -30,14 +30,16 @@
 
 /*!
     \namespace Aggregation
-    \brief The Aggregation namespace contains support for bundling related components,
+    \brief The Aggregation namespace contains support for bundling related
+       components,
            such that each component exposes the properties and behavior of the
            other components to the outside.
 
     Components that are bundled to an Aggregate can be "cast" to each other
-    and have a coupled life cycle. See the documentation of Aggregation::Aggregate for
+    and have a coupled life cycle. See the documentation of
+       Aggregation::Aggregate for
     details and examples.
-*/
+ */
 
 /*!
     \class Aggregation::Aggregate
@@ -53,11 +55,14 @@
     Specifically that means:
     \list
     \li They can be "cast" to each other (using query and query_all functions).
-    \li Their life cycle is coupled, i.e. whenever one is deleted all of them are.
+       内部的每个组件都可以相互“转换”
+    \li Their life cycle is coupled, i.e. whenever one is deleted all of them
+       are. 内部的每个组件的生命周期都被绑定在一起，例如，其中任意一个被析构，那么，剩余的所有组件也就会被析构
     \endlist
     Components can be of any QObject derived type.
 
-    You can use an Aggregate to simulate multiple inheritance by aggregation. Assume we have
+    You can use an Aggregate to simulate multiple inheritance by aggregation.
+       Assume we have
     \code
         using namespace Aggregation;
         class MyInterface : public QObject { ........ };
@@ -96,58 +101,64 @@
 
     Aggregation aware code never uses qobject_cast, but always uses
     Aggregation::query which behaves like a qobject_cast as a fallback.
-*/
+ */
 
 /*!
     \fn T *Aggregate::component()
 
-    Template function that returns the component with the given type, if there is one.
+    Template function that returns the component with the given type, if there
+       is one.
     If there are multiple components with that type a random one is returned.
 
     \sa Aggregate::components()
     \sa Aggregate::add()
-*/
+ */
 
 /*!
     \fn QList<T *> Aggregate::components()
 
-    Template function that returns all components with the given type, if there are any.
+    Template function that returns all components with the given type, if there
+       are any.
 
     \sa Aggregate::component()
     \sa Aggregate::add()
-*/
+ */
 
 /*!
     \fn T *Aggregation::query<T *>(Aggregate *obj)
     \internal
-*/
+ */
 
 /*!
     \fn QList<T *> Aggregation::query_all<T *>(Aggregate *obj)
     \internal
-*/
+ */
 
 /*!
     \relates Aggregation::Aggregate
     \fn T *Aggregation::query<T *>(QObject *obj)
 
     Performs a dynamic cast that is aware of a possible Aggregate that \a obj
-    might belong to. If \a obj itself is of the requested type then it is simply cast
-    and returned. Otherwise, if \a obj belongs to an Aggregate all its components are
+    might belong to. If \a obj itself is of the requested type then it is simply
+       cast
+    and returned. Otherwise, if \a obj belongs to an Aggregate all its
+       components are
     checked, or if it doesn't belong to an Aggregate null is returned.
 
     \sa Aggregate::component()
-*/
+ */
 
 /*!
     \relates Aggregation::Aggregate
     \fn QList<T *> Aggregation::query_all<T *>(QObject *obj)
 
-    If \a obj belongs to an Aggregate, all components that can be cast to the given
-    type are returned. Otherwise, \a obj is returned if it is of the requested type.
+    If \a obj belongs to an Aggregate, all components that can be cast to the
+       given
+    type are returned. Otherwise, \a obj is returned if it is of the requested
+       type.
 
     \sa Aggregate::components()
-*/
+ */
 
 using namespace Aggregation;
 
@@ -155,27 +166,30 @@ using namespace Aggregation;
     \fn Aggregate *Aggregate::parentAggregate(QObject *obj)
 
     Returns the Aggregate object of \a obj if there is one. Otherwise returns 0.
-*/
-Aggregate *Aggregate::parentAggregate(QObject *obj)
+ */
+Aggregate * Aggregate::parentAggregate(QObject *obj)
 {
-    QReadLocker locker(&lock());
-    return aggregateMap().value(obj);
+  QReadLocker locker(&lock());
+
+  return aggregateMap().value(obj);
 }
 
-QHash<QObject *, Aggregate *> &Aggregate::aggregateMap()
+QHash<QObject *, Aggregate *>& Aggregate::aggregateMap()
 {
-    static QHash<QObject *, Aggregate *> map;
-    return map;
+  static QHash<QObject *, Aggregate *> map;
+
+  return map;
 }
 
 /*!
     \fn QReadWriteLock &Aggregate::lock()
     \internal
-*/
-QReadWriteLock &Aggregate::lock()
+ */
+QReadWriteLock& Aggregate::lock()
 {
-    static QReadWriteLock lock;
-    return lock;
+  static QReadWriteLock lock;
+
+  return lock;
 }
 
 /*!
@@ -184,43 +198,45 @@ QReadWriteLock &Aggregate::lock()
     Creates a new Aggregate with the given \a parent.
     The \a parent is passed directly passed to the QObject part
     of the class and is not used beside that.
-*/
+ */
 Aggregate::Aggregate(QObject *parent)
-    : QObject(parent)
+  : QObject(parent)
 {
-    QWriteLocker locker(&lock());
-    aggregateMap().insert(this, this);
+  QWriteLocker locker(&lock());
+
+  aggregateMap().insert(this, this);
 }
 
 /*!
     \fn Aggregate::~Aggregate()
 
     Deleting the aggregate automatically deletes all its components.
-*/
+ */
 Aggregate::~Aggregate()
 {
-    QList<QObject *> components;
-    {
-        QWriteLocker locker(&lock());
-        foreach (QObject *component, m_components) {
-            disconnect(component, &QObject::destroyed, this, &Aggregate::deleteSelf);
-            aggregateMap().remove(component);
-        }
-        components = m_components;
-        m_components.clear();
-        aggregateMap().remove(this);
+  QList<QObject *> components;
+  {
+    QWriteLocker locker(&lock());
+    foreach(QObject * component, m_components) {
+      disconnect(component, &QObject::destroyed, this, &Aggregate::deleteSelf);
+      aggregateMap().remove(component);
     }
-    qDeleteAll(components);
+    components = m_components;
+    m_components.clear();
+    aggregateMap().remove(this);
+  }
+
+  qDeleteAll(components);
 }
 
 void Aggregate::deleteSelf(QObject *obj)
 {
-    {
-        QWriteLocker locker(&lock());
-        aggregateMap().remove(obj);
-        m_components.removeAll(obj);
-    }
-    delete this;
+  {
+    QWriteLocker locker(&lock());
+    aggregateMap().remove(obj);
+    m_components.removeAll(obj);
+  }
+  delete this;
 }
 
 /*!
@@ -231,25 +247,27 @@ void Aggregate::deleteSelf(QObject *obj)
     or an aggregate itself.
 
     \sa Aggregate::remove()
-*/
+ */
 void Aggregate::add(QObject *component)
 {
-    if (!component)
-        return;
-    {
-        QWriteLocker locker(&lock());
-        Aggregate *parentAggregation = aggregateMap().value(component);
-        if (parentAggregation == this)
-            return;
-        if (parentAggregation) {
-            qWarning() << "Cannot add a component that belongs to a different aggregate" << component;
-            return;
-        }
-        m_components.append(component);
-        connect(component, &QObject::destroyed, this, &Aggregate::deleteSelf);
-        aggregateMap().insert(component, this);
+  if (!component) return;
+
+  {
+    QWriteLocker locker(&lock());
+    Aggregate   *parentAggregation = aggregateMap().value(component);
+
+    if (parentAggregation == this) return;
+
+    if (parentAggregation) {
+      qWarning() <<
+      "Cannot add a component that belongs to a different aggregate" << component;
+      return;
     }
-    emit changed();
+    m_components.append(component);
+    connect(component, &QObject::destroyed, this, &Aggregate::deleteSelf);
+    aggregateMap().insert(component, this);
+  }
+  emit changed();
 }
 
 /*!
@@ -258,16 +276,16 @@ void Aggregate::add(QObject *component)
     Removes the \a component from the aggregate.
 
     \sa Aggregate::add()
-*/
+ */
 void Aggregate::remove(QObject *component)
 {
-    if (!component)
-        return;
-    {
-        QWriteLocker locker(&lock());
-        aggregateMap().remove(component);
-        m_components.removeAll(component);
-        disconnect(component, &QObject::destroyed, this, &Aggregate::deleteSelf);
-    }
-    emit changed();
+  if (!component) return;
+
+  {
+    QWriteLocker locker(&lock());
+    aggregateMap().remove(component);
+    m_components.removeAll(component);
+    disconnect(component, &QObject::destroyed, this, &Aggregate::deleteSelf);
+  }
+  emit changed();
 }
