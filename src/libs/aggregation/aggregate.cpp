@@ -51,7 +51,8 @@
 
     An Aggregate is a collection of components that are handled as a unit,
     such that each component exposes the properties and behavior of the
-    other components in the Aggregate to the outside.
+    other components in the Aggregate to the outside.将多个相关组件定义为一个聚合体，从而使外界可以将这些组件视为一个整体。
+    类似于实现多个接口，外部调用者在调用类的时候，可以将继承接口的类转换成任意一个已经实现的接口，也就是说这些接口通过这个类，将自己的属性和行为暴露给外界。
     Specifically that means:
     \list
     \li They can be "cast" to each other (using query and query_all functions).
@@ -204,6 +205,7 @@ Aggregate::Aggregate(QObject *parent)
 {
   QWriteLocker locker(&lock());
 
+  // 因为Aggregate本身就是QObject，表示Aggregate本身隶属于其自己这个聚合体
   aggregateMap().insert(this, this);
 }
 
@@ -214,6 +216,7 @@ Aggregate::Aggregate(QObject *parent)
  */
 Aggregate::~Aggregate()
 {
+  // 将所有对象移除object列表，从全局aggregateMap移除本对象
   QList<QObject *> components;
   {
     QWriteLocker locker(&lock());
@@ -226,11 +229,13 @@ Aggregate::~Aggregate()
     aggregateMap().remove(this);
   }
 
+  //删除所有的数据
   qDeleteAll(components);
 }
 
 void Aggregate::deleteSelf(QObject *obj)
 {
+  // 当有一个对象进行删除的时候，Aggregate中所有的对象都会删除
   {
     QWriteLocker locker(&lock());
     aggregateMap().remove(obj);
@@ -253,6 +258,7 @@ void Aggregate::add(QObject *component)
   if (!component) return;
 
   {
+    // 判定对象是否已经属于别的Aggregate类对象，如果已经属于直接返回
     QWriteLocker locker(&lock());
     Aggregate   *parentAggregation = aggregateMap().value(component);
 
@@ -260,9 +266,12 @@ void Aggregate::add(QObject *component)
 
     if (parentAggregation) {
       qWarning() <<
-      "Cannot add a component that belongs to a different aggregate" << component;
+        "Cannot add a component that belongs to a different aggregate" <<
+        component;
       return;
     }
+
+    // 添加到这个对象列表中，关联删除函数
     m_components.append(component);
     connect(component, &QObject::destroyed, this, &Aggregate::deleteSelf);
     aggregateMap().insert(component, this);
