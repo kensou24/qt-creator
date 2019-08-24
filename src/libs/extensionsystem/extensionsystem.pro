@@ -1,3 +1,5 @@
+#qt插件系统
+#前缀知识 D指针 https://wiki.qt.io/D-Pointer
 DEFINES += EXTENSIONSYSTEM_LIBRARY
 include(../../qtcreatorlibrary.pri)
 

@@ -1,4 +1,4 @@
-/****************************************************************************
+﻿/****************************************************************************
 **
 ** Copyright (C) 2016 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
@@ -29,9 +29,10 @@
 #include <qglobal.h>
 
 #if defined(EXTENSIONSYSTEM_LIBRARY)
-#  define EXTENSIONSYSTEM_EXPORT Q_DECL_EXPORT
-#else
-#  define EXTENSIONSYSTEM_EXPORT Q_DECL_IMPORT
-#endif
+# define EXTENSIONSYSTEM_EXPORT Q_DECL_EXPORT
+#else // if defined(EXTENSIONSYSTEM_LIBRARY)
+# define EXTENSIONSYSTEM_EXPORT Q_DECL_IMPORT
+#endif // if defined(EXTENSIONSYSTEM_LIBRARY)
 
+// 声明打印日志类别
 Q_DECLARE_LOGGING_CATEGORY(pluginLog)

@@ -1,4 +1,4 @@
-/****************************************************************************
+﻿/****************************************************************************
 **
 ** Copyright (C) 2016 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
@@ -58,14 +58,20 @@
     After the plugins' XML files have been read, and dependencies have been
     found, the plugin loading is done in three phases:
     \list 1
+        根据插件的依赖关系加载各个插件
     \li All plugin libraries are loaded in \e{root-to-leaf} order of the
        dependency tree.
+
+        插件初始化
     \li All plugins' initialize functions are called in \e{root-to-leaf} order
        of the dependency tree. This is a good time to create objects
        needed by other plugins and register them via appropriate core functions
        or, if a weak dependency is neceessary to be implemented, to put
        them into the global object pool.
-    \li All plugins' extensionsInitialized functions are called in \e{leaf-to-root}
+
+        extensionsInitialized是根据依赖树的逆顺序，从叶子节点到跟节点进行数据调用的
+    \li All plugins' extensionsInitialized functions are called in
+       \e{leaf-to-root}
        order of the dependency tree. At this point, plugins can
        be sure that all plugins that depend on this plugin have
        been initialized completely and objects these plugins wish to
@@ -73,10 +79,11 @@
     \endlist
     If library loading or initialization of a plugin fails, all plugins
     that depend on that plugin also fail.
-*/
+ */
 
 /*!
-    \fn bool IPlugin::initialize(const QStringList &arguments, QString *errorString)
+    \fn bool IPlugin::initialize(const QStringList &arguments, QString
+       *errorString)
     \brief Called after the plugin has been loaded and the IPlugin instance
     has been created.
 
@@ -89,12 +96,13 @@
 
     \sa extensionsInitialized()
     \sa delayedInitialize()
-*/
+ */
 
 /*!
     \fn void IPlugin::extensionsInitialized()
     \brief Called after the IPlugin::initialize() function has been called,
-    and after both the IPlugin::initialize() and IPlugin::extensionsInitialized()
+    and after both the IPlugin::initialize() and
+       IPlugin::extensionsInitialized()
     functions of plugins that depend on this plugin have been called.
 
     In this function, the plugin can assume that plugins that depend on
@@ -104,28 +112,37 @@
 
     \sa initialize()
     \sa delayedInitialize()
-*/
+ */
 
 /*!
     \fn bool IPlugin::delayedInitialize()
-    \brief Called after all plugins' IPlugin::extensionsInitialized() function has been called,
-    and after the IPlugin::delayedInitialize() function of plugins that depend on this plugin
+    \brief Called after all plugins' IPlugin::extensionsInitialized() function
+       has been called,
+    and after the IPlugin::delayedInitialize() function of plugins that depend
+       on this plugin
     have been called.
 
-    The plugins' delayedInitialize() functions are called after the application is already running,
-    with a few milliseconds delay to application startup, and between individual delayedInitialize
-    function calls. To avoid unnecessary delays, a plugin should return true from the function if it
-    actually implements it, to indicate that the next plugins' delayedInitialize() call should
-    be delayed a few milliseconds to give input and paint events a chance to be processed.
+    The plugins' delayedInitialize() functions are called after the application
+       is already running,
+    with a few milliseconds delay to application startup, and between individual
+       delayedInitialize
+    function calls. To avoid unnecessary delays, a plugin should return true
+       from the function if it
+    actually implements it, to indicate that the next plugins'
+       delayedInitialize() call should
+    be delayed a few milliseconds to give input and paint events a chance to be
+       processed.
 
-    This function can be used if a plugin needs to do non-trivial setup that doesn't
-    necessarily need to be done directly at startup, but still should be done within a
+    This function can be used if a plugin needs to do non-trivial setup that
+       doesn't
+    necessarily need to be done directly at startup, but still should be done
+       within a
     short time afterwards. This can decrease the felt plugin/application startup
     time a lot, with very little effort.
 
     \sa initialize()
     \sa extensionsInitialized()
-*/
+ */
 
 /*!
     \fn IPlugin::ShutdownFlag IPlugin::aboutToShutdown()
@@ -148,20 +165,24 @@
     asynchronous actions before performing the shutdown.
 
     \sa asynchronousShutdownFinished()
-*/
+ */
 
 /*!
-    \fn QObject *IPlugin::remoteCommand(const QStringList &options, const QStringList &arguments)
-    \brief When \QC is executed with the -client argument while already another instance of \QC
-           is running, this function of plugins is called in the running instance.
+    \fn QObject *IPlugin::remoteCommand(const QStringList &options, const
+       QStringList &arguments)
+    \brief When \QC is executed with the -client argument while already another
+       instance of \QC
+           is running, this function of plugins is called in the running
+              instance.
 
     Plugin-specific arguments are passed in \a options, while the rest of the
     arguments are passed in \a arguments.
 
-    \returns a QObject that blocks the command until it is destroyed, if -block is used.
+    \returns a QObject that blocks the command until it is destroyed, if -block
+       is used.
 
     \sa PluginManager::serializedArguments()
-*/
+ */
 
 /*!
     \fn void IPlugin::asynchronousShutdownFinished()
@@ -169,27 +190,26 @@
     is ready to proceed with the shutdown sequence.
 
     \sa aboutToShutdown()
-*/
+ */
 
 using namespace ExtensionSystem;
 
 /*!
     \fn IPlugin::IPlugin()
     \internal
-*/
+ */
 IPlugin::IPlugin()
-    : d(new Internal::IPluginPrivate())
-{
-}
+  : d(new Internal::IPluginPrivate())
+{}
 
 /*!
     \fn IPlugin::~IPlugin()
     \internal
-*/
+ */
 IPlugin::~IPlugin()
 {
-    delete d;
-    d = nullptr;
+  delete d;
+  d = nullptr;
 }
 
 /*!
@@ -197,21 +217,22 @@ IPlugin::~IPlugin()
 
     Returns objects that are meant to be passed on to QTest::qExec().
 
-    This function will be called if the user starts \QC with '-test PluginName' or '-test all'.
+    This function will be called if the user starts \QC with '-test PluginName'
+       or '-test all'.
 
     The ownership of returned objects is transferred to caller.
-*/
-QVector<QObject *> IPlugin::createTestObjects() const
+ */
+QVector<QObject *>IPlugin::createTestObjects() const
 {
-    return {};
+  return {};
 }
 
 /*!
     \fn PluginSpec *IPlugin::pluginSpec() const
     Returns the PluginSpec corresponding to this plugin.
     This is not available in the constructor.
-*/
-PluginSpec *IPlugin::pluginSpec() const
+ */
+PluginSpec * IPlugin::pluginSpec() const
 {
-    return d->pluginSpec;
+  return d->pluginSpec;
 }
