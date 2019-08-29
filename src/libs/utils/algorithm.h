@@ -1,4 +1,4 @@
-/****************************************************************************
+﻿/****************************************************************************
 **
 ** Copyright (C) 2016 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
@@ -28,6 +28,7 @@
 #include "predicates.h"
 #include "optional.h"
 
+//编译配置选项（宏）中可以看出Qt支持的编译环境。
 #include <qcompilerdetection.h> // for Q_REQUIRED_RESULT
 
 #include <algorithm>
@@ -45,6 +46,10 @@
 #include <memory>
 #include <type_traits>
 
+/**
+ *定义了关于容器的一系列的方法
+ * 还有pointeralgorithm.h提供了关于指针的一些算法
+ */
 namespace Utils
 {
 

@@ -1,4 +1,4 @@
-/****************************************************************************
+﻿/****************************************************************************
 **
 ** Copyright (C) 2016 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
@@ -40,63 +40,76 @@ QT_FORWARD_DECLARE_CLASS(QDebug)
 QT_FORWARD_DECLARE_CLASS(QProcessEnvironment)
 
 namespace Utils {
-
-class QTCREATOR_UTILS_EXPORT Environment final : public NameValueDictionary
-{
+/**
+ * @brief 获取系统运行环境变量数据
+ */
+class QTCREATOR_UTILS_EXPORT Environment final : public NameValueDictionary {
 public:
-    using NameValueDictionary::NameValueDictionary;
 
-    static Environment systemEnvironment();
-    static void setupEnglishOutput(Environment *environment);
-    static void setupEnglishOutput(QProcessEnvironment *environment);
-    static void setupEnglishOutput(QStringList *environment);
+  using NameValueDictionary::NameValueDictionary;
 
-    QProcessEnvironment toProcessEnvironment() const;
+  static Environment  systemEnvironment();
+  static void         setupEnglishOutput(Environment *environment);
+  static void         setupEnglishOutput(QProcessEnvironment *environment);
+  static void         setupEnglishOutput(QStringList *environment);
 
-    void appendOrSet(const QString &key, const QString &value, const QString &sep = QString());
-    void prependOrSet(const QString &key, const QString &value, const QString &sep = QString());
+  QProcessEnvironment toProcessEnvironment() const;
 
-    void appendOrSetPath(const QString &value);
-    void prependOrSetPath(const QString &value);
+  void                appendOrSet(const QString& key,
+                                  const QString& value,
+                                  const QString& sep = QString());
+  void                prependOrSet(const QString& key,
+                                   const QString& value,
+                                   const QString& sep = QString());
 
-    void prependOrSetLibrarySearchPath(const QString &value);
-    void prependOrSetLibrarySearchPaths(const QStringList &values);
+  void     appendOrSetPath(const QString& value);
+  void     prependOrSetPath(const QString& value);
 
-    using PathFilter = std::function<bool(const FilePath &)>;
-    FilePath searchInPath(const QString &executable,
-                          const FilePathList &additionalDirs = FilePathList(),
-                          const PathFilter &func = PathFilter()) const;
-    FilePathList findAllInPath(const QString &executable,
-                               const FilePathList &additionalDirs = FilePathList(),
-                               const PathFilter &func = PathFilter()) const;
+  void     prependOrSetLibrarySearchPath(const QString& value);
+  void     prependOrSetLibrarySearchPaths(const QStringList& values);
 
-    FilePathList path() const;
-    FilePathList pathListValue(const QString &varName) const;
-    QStringList appendExeExtensions(const QString &executable) const;
+  using PathFilter = std::function<bool (const FilePath&)>;
+  FilePath searchInPath(const QString     & executable,
+                        const FilePathList& additionalDirs = FilePathList(),
+                        const PathFilter  & func           =
+                               PathFilter()) const;
+  FilePathList findAllInPath(const QString     & executable,
+                             const FilePathList& additionalDirs = FilePathList(),
+                             const PathFilter  & func           =
+                               PathFilter()) const;
 
-    bool isSameExecutable(const QString &exe1, const QString &exe2) const;
+  FilePathList path() const;
+  FilePathList pathListValue(const QString& varName) const;
+  QStringList  appendExeExtensions(const QString& executable) const;
 
-    QString expandVariables(const QString &input) const;
-    FilePath expandVariables(const FilePath &input) const;
-    QStringList expandVariables(const QStringList &input) const;
+  bool         isSameExecutable(const QString& exe1,
+                                const QString& exe2) const;
 
-    static void modifySystemEnvironment(const EnvironmentItems &list); // use with care!!!
+  QString      expandVariables(const QString& input) const;
+  FilePath     expandVariables(const FilePath& input) const;
+  QStringList  expandVariables(const QStringList& input) const;
+
+  static void  modifySystemEnvironment(const EnvironmentItems& list); // use
+                                                                      // with
+                                                                      // care!!!
 
 private:
-    FilePath searchInDirectory(const QStringList &execs, const FilePath &directory,
-                               QSet<FilePath> &alreadyChecked) const;
+
+  FilePath searchInDirectory(const QStringList& execs,
+                             const FilePath   & directory,
+                             QSet<FilePath>   & alreadyChecked) const;
 };
 
-class QTCREATOR_UTILS_EXPORT EnvironmentProvider
-{
+class QTCREATOR_UTILS_EXPORT EnvironmentProvider {
 public:
-    QByteArray id;
-    QString displayName;
-    std::function<Environment()> environment;
 
-    static void addProvider(EnvironmentProvider &&provider);
-    static const QVector<EnvironmentProvider> providers();
-    static optional<EnvironmentProvider> provider(const QByteArray &id);
+  QByteArray id;
+  QString displayName;
+  std::function<Environment()>environment;
+
+  static void                              addProvider(
+    EnvironmentProvider&& provider);
+  static const QVector<EnvironmentProvider>providers();
+  static optional<EnvironmentProvider>     provider(const QByteArray& id);
 };
-
 } // namespace Utils

@@ -1,4 +1,4 @@
-/****************************************************************************
+﻿/****************************************************************************
 **
 ** Copyright (C) 2016 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
@@ -27,62 +27,70 @@
 #include "theme/theme_p.h"
 
 #ifdef Q_OS_WIN
-#include <windows.h>
-#endif
+# include <windows.h>
+#endif // ifdef Q_OS_WIN
 
 #include <QEvent>
 #include <QCoreApplication>
 
 namespace Utils {
-
 /* The notification signal is delayed by using a custom event
  * as otherwise device removal is not detected properly
  * (devices are still present in the registry. */
 
+/**
+ * @brief The DeviceNotifyEvent class
+ */
 class DeviceNotifyEvent : public QEvent {
 public:
-    explicit DeviceNotifyEvent(int id) : QEvent(static_cast<QEvent::Type>(id)) {}
+
+  explicit DeviceNotifyEvent(int id) : QEvent(static_cast<QEvent::Type>(id)) {}
 };
 
+/**
+ * @brief AppMainWindow::AppMainWindow
+ * 接收处理设备变更的窗口
+ */
 AppMainWindow::AppMainWindow() :
-        m_deviceEventId(QEvent::registerEventType(QEvent::User + 2))
-{
-}
+  m_deviceEventId(QEvent::registerEventType(QEvent::User + 2))
+{}
 
 void AppMainWindow::raiseWindow()
 {
-    setWindowState(windowState() & ~Qt::WindowMinimized);
+  setWindowState(windowState() & ~Qt::WindowMinimized);
 
-    raise();
+  raise();
 
-    activateWindow();
+  activateWindow();
 }
 
 #ifdef Q_OS_WIN
 bool AppMainWindow::event(QEvent *event)
 {
-    const QEvent::Type type = event->type();
-    if (type == m_deviceEventId) {
-        event->accept();
-        emit deviceChange();
-        return true;
-    }
-    if (type == QEvent::ThemeChange)
-        setThemeApplicationPalette();
-    return QMainWindow::event(event);
+  const QEvent::Type type = event->type();
+
+  if (type == m_deviceEventId) {
+    event->accept();
+    emit deviceChange();
+    return true;
+  }
+
+  if (type == QEvent::ThemeChange) setThemeApplicationPalette();
+  return QMainWindow::event(event);
 }
 
 bool AppMainWindow::winEvent(MSG *msg, long *result)
 {
-    if (msg->message == WM_DEVICECHANGE) {
-        if (msg->wParam & 0x7 /* DBT_DEVNODES_CHANGED */) {
-            *result = TRUE;
-            QCoreApplication::postEvent(this, new DeviceNotifyEvent(m_deviceEventId));
-        }
+  if (msg->message == WM_DEVICECHANGE) {
+    if (msg->wParam & 0x7 /* DBT_DEVNODES_CHANGED */) {
+      *result = TRUE;
+
+      /**发送到qt消息处理*/
+      QCoreApplication::postEvent(this, new DeviceNotifyEvent(m_deviceEventId));
     }
-    return false;
+  }
+  return false;
 }
-#endif
 
+#endif // ifdef Q_OS_WIN
 } // namespace Utils
-
